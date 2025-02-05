@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.example.identity_service.exception.AppException;
 import com.example.identity_service.exception.ErrorCode;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.example.identity_service.dto.request.RoleRequest;
@@ -27,6 +28,7 @@ public class RoleService {
     PermissionRepository permissionRepository;
     RoleMapper roleMapper;
 
+    @PreAuthorize("hasRole('ADMIN')")
     public RoleResponse create(RoleRequest request) {
         try {
             var role = roleMapper.toRole(request);
@@ -44,6 +46,7 @@ public class RoleService {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public List<RoleResponse> getAll() {
         try {
             return roleRepository.findAll().stream()
@@ -54,6 +57,7 @@ public class RoleService {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(String roleId) {
         try {
             roleRepository.deleteById(roleId);

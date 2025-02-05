@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.identity_service.exception.AppException;
 import com.example.identity_service.exception.ErrorCode;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.example.identity_service.dto.request.PermissionRequest;
@@ -26,6 +27,7 @@ public class PermissionService {
     PermissionRepository permissionRepository;
     PermissionMapper permissionMapper;
 
+    @PreAuthorize("hasRole('ADMIN')")
     public PermissionResponse create(PermissionRequest request) {
         log.info("Creating permission: {}", request.getName());
 
@@ -43,6 +45,7 @@ public class PermissionService {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public List<PermissionResponse> getAll() {
         log.info("Fetching all permissions");
         return permissionRepository.findAll().stream()
@@ -50,6 +53,7 @@ public class PermissionService {
                 .toList();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(String permissionName) {
         log.info("Deleting permission: {}", permissionName);
 

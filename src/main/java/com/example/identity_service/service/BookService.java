@@ -35,11 +35,6 @@ public class BookService {
     CategoryRepository categoryRepository;
     BookMapper bookMapper;
 
-    public List<Book> getAllBooks() {
-
-        return bookRepository.findAll();
-    }
-
     public BookResponse getBook(String bookId) {
         return bookMapper.toBookResponse(
                 bookRepository.findById(bookId)
