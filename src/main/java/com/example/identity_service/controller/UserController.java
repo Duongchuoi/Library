@@ -1,8 +1,11 @@
 package com.example.identity_service.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import com.example.identity_service.dto.request.BookRequest;
+import com.example.identity_service.entity.Book;
 import com.example.identity_service.entity.User;
 import jakarta.validation.Valid;
 
@@ -97,6 +100,13 @@ public class UserController {
         userService.restorePermission(userId, permissionName);
         return ApiResponse.<String>builder()
                 .Result("Permission restored successfully")
+                .build();
+    }
+
+    @PostMapping(value = "/createad")
+    ApiResponse<User> saveAdUser(@ModelAttribute @Valid UserCreationRequest request) throws IOException {
+        return ApiResponse.<User>builder()
+                .Result(userService.saveAdUser(request))
                 .build();
     }
 

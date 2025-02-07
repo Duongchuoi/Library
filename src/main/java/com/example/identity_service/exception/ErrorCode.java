@@ -45,6 +45,8 @@ public enum ErrorCode {
     COMMENT_NOT_FOUND(1032, "Comment not found", HttpStatus.NOT_FOUND),
     COMMENT_UPDATE_FAILED(1033, "Comment update failed", HttpStatus.BAD_REQUEST),
     COMMENT_DELETION_FAILED(1034, "Comment deletion failed", HttpStatus.BAD_REQUEST),
+    INVALID_REQUEST(1035, "Invalid request", HttpStatus.BAD_REQUEST),
+    POST_RETRIEVAL_FAILED(1036, "Post retrieval failed", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode httpStatusCode) {

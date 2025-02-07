@@ -30,7 +30,11 @@ public class PostService {
     UserRepository userRepository;
 
     public List<Post> getAllReviewsByBook(String bookId) {
-        return postRepository.findByBookId(bookId);
+        try {
+            return postRepository.findByBookId(bookId);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.POST_RETRIEVAL_FAILED);
+        }
     }
 
     public Post getPostById(String postId) {
@@ -96,4 +100,19 @@ public class PostService {
         }
     }
 
+    public List<Post> getAllPosts() {
+        try {
+            return postRepository.findAll();
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.POST_RETRIEVAL_FAILED);
+        }
+    }
+
+    public List<Post> getTop5MostLikedPosts() {
+        try {
+            return postRepository.findTop5ByOrderByLikeCountDesc();
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.POST_RETRIEVAL_FAILED);
+        }
+    }
 }

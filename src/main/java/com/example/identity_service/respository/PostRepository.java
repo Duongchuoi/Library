@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, String> {
     List<Post> findByBookId(String bookId);
+
+    List<Post> findTop5ByOrderByLikeCountDesc();
 }

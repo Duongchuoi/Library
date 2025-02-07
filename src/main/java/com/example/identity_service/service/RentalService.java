@@ -18,8 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -71,5 +70,48 @@ public class RentalService {
 
         // Xóa giỏ hàng sau khi thuê
         cartRepository.deleteByUserId(user.getId());
+    }
+
+    public List<Rental> getAllRentals() {
+        try {
+            return rentalRepository.findAll();
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public List<Rental> getCurrentUserRentals() {
+        try {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+            return rentalRepository.findByUserId(user.getId());
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public Map<String, List<Map<String, Object>>> getMostRentedBooksByCategory() {
+        List<Object[]> results = rentalRepository.findMostRentedBooksByCategory();
+        Map<String, List<Map<String, Object>>> categorizedBooks = new LinkedHashMap<>();
+
+        for (Object[] row : results) {
+            String categoryName = (String) row[0];
+            Book book = (Book) row[1];
+            Long totalRented = (Long) row[2];
+
+            // Định dạng dữ liệu sách
+            Map<String, Object> bookData = new HashMap<>();
+            bookData.put("bookId", book.getId());
+            bookData.put("title", book.getTitle());
+            bookData.put("totalRented", totalRented);
+
+            // Nhóm sách theo thể loại
+            categorizedBooks.putIfAbsent(categoryName, new ArrayList<>());
+            categorizedBooks.get(categoryName).add(bookData);
+        }
+
+        return categorizedBooks;
     }
 }

@@ -34,7 +34,9 @@ public class Post {
     @OneToMany
     List<Comment> comments;
 
-    public Post(String content) {
-        this.content = content;
-    }
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Like> likes;
+
+    @Column(nullable = false)
+    int likeCount = 0; // Số lượt like mặc định là 0
 }

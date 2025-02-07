@@ -1,11 +1,11 @@
 package com.example.identity_service.service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import com.example.identity_service.entity.RevokedPermission;
-import com.example.identity_service.entity.Role;
+import com.example.identity_service.dto.request.BookRequest;
+import com.example.identity_service.entity.*;
 import com.example.identity_service.respository.RevokedPermissionRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -19,7 +19,6 @@ import com.example.identity_service.constant.PredefinedRole;
 import com.example.identity_service.dto.request.UserCreationRequest;
 import com.example.identity_service.dto.request.UserUpdateRequest;
 import com.example.identity_service.dto.response.UserResponse;
-import com.example.identity_service.entity.User;
 import com.example.identity_service.exception.AppException;
 import com.example.identity_service.exception.ErrorCode;
 import com.example.identity_service.mapper.UserMapper;
@@ -85,6 +84,7 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(String userID) {
         userRepository.deleteById(userID);
     }
@@ -107,6 +107,7 @@ public class UserService {
     /**
      * Thu hồi quyền của user
      */
+    @PreAuthorize("hasRole('ADMIN')")
     public void revokePermission(String userId, String permissionName) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -124,11 +125,32 @@ public class UserService {
     /**
      * Khôi phục quyền đã thu hồi
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void restorePermission(String userId, String permissionName) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         revokedPermissionRepository.deleteByUserAndPermissionName(user, permissionName);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public User saveAdUser(UserCreationRequest request) {
+        try {
+            // Xử lý danh mục role
+            Set<Role> roles = request.getRoles().stream()
+                    .map(name -> roleRepository.findById(name)
+                            .orElseGet(() -> roleRepository.save(
+                                    Role.builder().name(name).description("").build()
+                            )))
+                    .collect(Collectors.toSet());
+
+            User user = userMapper.toUser(request);
+            user.setRoles(roles);
+
+            return userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
     }
 }

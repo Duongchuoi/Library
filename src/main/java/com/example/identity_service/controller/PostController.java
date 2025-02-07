@@ -54,4 +54,19 @@ public class PostController {
         postService.deletePost(postId);
         return ApiResponse.<Void>builder().build();
     }
+
+    @GetMapping
+    public ApiResponse<List<Post>> getAllPosts() {
+        return ApiResponse.<List<Post>>builder()
+                .Result(postService.getAllPosts())
+                .build();
+    }
+
+    // API lấy 5 bài viết có nhiều like nhất
+    @GetMapping("/top-liked")
+    public ApiResponse<List<Post>> getTop5MostLikedPosts() {
+        return ApiResponse.<List<Post>>builder()
+                .Result(postService.getTop5MostLikedPosts())
+                .build();
+    }
 }
