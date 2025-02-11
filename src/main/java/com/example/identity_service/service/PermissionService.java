@@ -54,6 +54,27 @@ public class PermissionService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    public PermissionResponse updatePermission(String permissionName, PermissionRequest request) {
+        log.info("Updating permission: {}", permissionName);
+
+        // Kiểm tra xem quyền có tồn tại không
+        Permission existingPermission = permissionRepository.findById(permissionName)
+                .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
+
+        try {
+            // Cập nhật thông tin quyền
+            existingPermission.setName(request.getName());
+            existingPermission.setDescription(request.getDescription());
+
+            // Lưu vào DB
+            existingPermission = permissionRepository.save(existingPermission);
+            return permissionMapper.toPermissionResponse(existingPermission);
+        } catch (DataIntegrityViolationException e) {
+            throw new AppException(ErrorCode.PERMISSION_UPDATE_FAILED);
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(String permissionName) {
         log.info("Deleting permission: {}", permissionName);
 

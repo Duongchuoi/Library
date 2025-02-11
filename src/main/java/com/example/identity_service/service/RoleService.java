@@ -30,6 +30,9 @@ public class RoleService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public RoleResponse create(RoleRequest request) {
+        if (roleRepository.existsById(request.getName())) {
+            throw new AppException(ErrorCode.ROLE_ALREADY_EXISTS);
+        }
         try {
             var role = roleMapper.toRole(request);
 
@@ -54,6 +57,31 @@ public class RoleService {
                     .toList();
         } catch (Exception e) {
             throw new AppException(ErrorCode.GET_ROLE_FAILED);
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public RoleResponse updateRole(String roleName, RoleRequest request) {
+        try {
+            // Kiểm tra role có tồn tại không
+            var role = roleRepository.findById(roleName)
+                    .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+
+            // Cập nhật thông tin role
+            role.setName(request.getName());
+            role.setDescription(request.getDescription());
+
+            // Cập nhật permissions nếu có trong request
+            if (request.getPermissions() != null && !request.getPermissions().isEmpty()) {
+                var permissions = permissionRepository.findAllById(request.getPermissions());
+                role.setPermissions(new HashSet<>(permissions));
+            }
+
+            // Lưu lại role đã cập nhật
+            role = roleRepository.save(role);
+            return roleMapper.toRoleResponse(role);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.ROLE_UPDATE_FAILED);
         }
     }
 

@@ -14,12 +14,15 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -62,16 +65,19 @@ public class RentalService {
                     .rentalDate(LocalDate.now())
                     .dueDate(LocalDate.now().plusDays(14)) // 14 ngày thuê
                     .build();
+            log.info("User {} rentals book: {}",user.getId(), book.getTitle());
             rentals.add(rental);
         }
 
         // Lưu danh sách thuê
+
         rentalRepository.saveAll(rentals);
 
         // Xóa giỏ hàng sau khi thuê
         cartRepository.deleteByUserId(user.getId());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Rental> getAllRentals() {
         try {
             return rentalRepository.findAll();
@@ -113,5 +119,19 @@ public class RentalService {
         }
 
         return categorizedBooks;
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public void markAsReturned(String rentalId) {
+        Rental rental = rentalRepository.findById(rentalId)
+                .orElseThrow(() -> new AppException(ErrorCode.RENTAL_NOT_FOUND));
+
+        if (rental.isReturned()) {
+            throw new AppException(ErrorCode.RENTAL_ALREADY_RETURNED);
+        }
+
+        rental.setReturned(true);
+        rentalRepository.save(rental);
     }
 }

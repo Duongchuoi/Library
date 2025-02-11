@@ -37,6 +37,14 @@ public class CategoryController {
                 .build();
     }
 
+    @PutMapping("/{category}")
+    ApiResponse<CategoryResponse> update(@PathVariable("category") String category,
+                                         @RequestBody CategoryRequest request) {
+        return ApiResponse.<CategoryResponse>builder()
+                .Result(categoryService.update(category, request))
+                .build();
+    }
+
     @DeleteMapping("/{category}")
     ApiResponse<Void> delete(@PathVariable("category") String permission) {
         categoryService.delete(permission);

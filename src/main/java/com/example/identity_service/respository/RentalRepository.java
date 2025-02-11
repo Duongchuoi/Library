@@ -18,4 +18,6 @@ public interface RentalRepository extends JpaRepository<Rental, String> {
             "GROUP BY c.name, b " +
             "ORDER BY c.name ASC, total_rented DESC")
     List<Object[]> findMostRentedBooksByCategory();
+
+    List<Rental> findByReturnedFalse();
 }

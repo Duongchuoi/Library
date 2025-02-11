@@ -9,6 +9,8 @@ import com.example.identity_service.entity.Book;
 import com.example.identity_service.entity.User;
 import jakarta.validation.Valid;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -110,4 +112,13 @@ public class UserController {
                 .build();
     }
 
+    @GetMapping("/export/excel")
+    public ResponseEntity<byte[]> exportUsersToExcel() {
+        byte[] excelData = userService.exportUsersToExcel();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=users.xlsx")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(excelData);
+    }
 }

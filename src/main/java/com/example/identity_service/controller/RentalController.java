@@ -50,4 +50,12 @@ public class RentalController {
                 .Result(rentalService.getMostRentedBooksByCategory())
                 .build();
     }
+
+    @PutMapping("/{rentalId}/return")
+    ApiResponse<String> markAsReturned(@PathVariable String rentalId) {
+        rentalService.markAsReturned(rentalId);
+        return ApiResponse.<String>builder()
+                .Result("Rental marked as returned successfully")
+                .build();
+    }
 }

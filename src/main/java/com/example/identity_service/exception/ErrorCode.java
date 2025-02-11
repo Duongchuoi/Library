@@ -47,6 +47,18 @@ public enum ErrorCode {
     COMMENT_DELETION_FAILED(1034, "Comment deletion failed", HttpStatus.BAD_REQUEST),
     INVALID_REQUEST(1035, "Invalid request", HttpStatus.BAD_REQUEST),
     POST_RETRIEVAL_FAILED(1036, "Post retrieval failed", HttpStatus.BAD_REQUEST),
+    PERMISSION_UPDATE_FAILED(1037, "Permission update failed", HttpStatus.BAD_REQUEST),
+    ROLE_UPDATE_FAILED(1038, "Role update failed", HttpStatus.BAD_REQUEST),
+    ROLE_ALREADY_EXISTS(1039, "Role already exists", HttpStatus.BAD_REQUEST),
+    CATEGORY_ALREADY_EXISTS(1040, "Category already exists", HttpStatus.BAD_REQUEST),
+    CATEGORY_CREATION_FAILED(1041, "Category creation failed", HttpStatus.BAD_REQUEST),
+    GET_CATEGORY_FAILED(1042, "Get category failed", HttpStatus.BAD_REQUEST),
+    CATEGORY_UPDATE_FAILED(1043, "Category update failed", HttpStatus.BAD_REQUEST),
+    CATEGORY_DELETION_FAILED(1044, "Category deletion failed", HttpStatus.BAD_REQUEST),
+    NO_USERS_FOUND(1045, "No users found", HttpStatus.NOT_FOUND),
+    EXPORT_EXCEL_FAILED(1046, "Export excel failed", HttpStatus.INTERNAL_SERVER_ERROR),
+    RENTAL_NOT_FOUND(1047, "Rental not found", HttpStatus.NOT_FOUND),
+    RENTAL_ALREADY_RETURNED(1048, "Rental already returned", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode httpStatusCode) {

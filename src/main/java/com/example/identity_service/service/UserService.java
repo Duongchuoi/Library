@@ -1,5 +1,6 @@
 package com.example.identity_service.service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -8,6 +9,11 @@ import com.example.identity_service.dto.request.BookRequest;
 import com.example.identity_service.entity.*;
 import com.example.identity_service.respository.RevokedPermissionRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,6 +38,7 @@ import lombok.experimental.FieldDefaults;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class UserService {
     UserRepository userRepository;
     RoleRepository roleRepository;
@@ -151,6 +158,45 @@ public class UserService {
             return userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
             throw new AppException(ErrorCode.USER_EXISTED);
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public byte[] exportUsersToExcel() {
+        List<User> users = userRepository.findAll();
+
+        if (users.isEmpty()) {
+            throw new AppException(ErrorCode.NO_USERS_FOUND);
+        }
+
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("Users");
+
+            // Tạo hàng tiêu đề
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {"ID", "Username", "Full Name", "Email", "Phone", "DOB", "Roles"};
+            for (int i = 0; i < headers.length; i++) {
+                headerRow.createCell(i).setCellValue(headers[i]);
+            }
+
+            // Ghi dữ liệu người dùng
+            int rowIndex = 1;
+            for (User user : users) {
+                Row row = sheet.createRow(rowIndex++);
+                row.createCell(0).setCellValue(user.getId());
+                row.createCell(1).setCellValue(user.getUsername());
+                row.createCell(2).setCellValue(user.getFullname());
+                row.createCell(3).setCellValue(user.getEmail());
+                row.createCell(4).setCellValue(user.getPhone());
+                row.createCell(5).setCellValue(user.getDob() != null ? user.getDob().toString() : "");
+                row.createCell(6).setCellValue(user.getRoles().stream().map(Role::getName).collect(Collectors.joining(", ")));
+            }
+
+            workbook.write(outputStream);
+            return outputStream.toByteArray();
+        } catch (IOException e) {
+            log.error("Lỗi khi tạo file Excel", e);
+            throw new AppException(ErrorCode.EXPORT_EXCEL_FAILED);
         }
     }
 }

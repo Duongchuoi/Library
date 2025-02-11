@@ -29,5 +29,6 @@ public class Rental {
     int quantity;
     LocalDate rentalDate; // Ngày thuê
     LocalDate dueDate; // Ngày phải trả
+    boolean returned;
 }
 
